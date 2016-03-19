@@ -73,13 +73,8 @@ public class MainActivity extends Activity {
     };
     
     
-    public void onItemClick(int position)
-    {
-    	String tempValues = listData.get(position).getImageHref();    	
-    	Toast.makeText(MainActivity.this, 
-    			"Image URL : "+tempValues, 
-    			Toast.LENGTH_LONG)
-    	.show();
+    public void onItemClick(int position) {
+    	//TODO later
     }
 
     private class JSONParse extends AsyncTask<String, String, JSONObject> {

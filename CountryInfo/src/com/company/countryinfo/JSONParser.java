@@ -25,9 +25,7 @@ public class JSONParser {
   
     public JSONObject getJSONFromUrl(String strUrl) {
  
-    	Log.d(TAG,"####### Start fetch from server ");
-        // Making HTTP request
-        try {
+    	try {
             // defaultHttpClient
             DefaultHttpClient httpClient = new DefaultHttpClient();
             HttpGet httpGet = new HttpGet(strUrl);
@@ -35,7 +33,7 @@ public class JSONParser {
             HttpResponse httpResponse = httpClient.execute(httpGet);
             HttpEntity httpEntity = httpResponse.getEntity();
             is = httpEntity.getContent(); 
-            Log.d(TAG,"####### Response fetched from server ");
+            Log.d(TAG,"JSON response received from server ");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         } catch (ClientProtocolException e) {
@@ -67,8 +65,6 @@ public class JSONParser {
         }
  
         // return JSON String
-        Log.d(TAG,"####### Return after fetch ");
         return jObj;
- 
     }
 }
