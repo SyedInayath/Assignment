@@ -1,5 +1,10 @@
 package com.company.countryinfo;
 
+/*
+ * ClassName    : JsonItem
+ * Description  : Data class as per number of items from JSON response
+ * 
+ */
 public class JsonItem {
     private String title;
     private String description;
@@ -11,6 +16,7 @@ public class JsonItem {
         this.imageHref = imageHref;
     }
 
+    /* Getter methods */
     public String getTitle() {
         return title;
     }

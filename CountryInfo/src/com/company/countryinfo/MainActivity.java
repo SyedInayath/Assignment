@@ -27,10 +27,10 @@ public class MainActivity extends Activity {
 
     private static final String TAG = "MainActivity";
     private ArrayList<JsonItem>  listData = new ArrayList<JsonItem>();
-    //URL to get JSON Array
-    private static String url = "https://dl.dropboxusercontent.com/u/746330/facts.json";
 
+    /* list view with data */
     ListView list;
+    /* Image loading adapter */
     LazyImageLoadAdapter adapter;
 
     @Override
@@ -38,8 +38,8 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
+        /* Check if network availability */
         if (isOnline()) {
-
             list=(ListView)findViewById(R.id.list);
             // Create custom adapter for listview
             adapter=new LazyImageLoadAdapter(this, listData);
@@ -47,21 +47,24 @@ public class MainActivity extends Activity {
             //Set adapter to listview
             list.setAdapter(adapter);
 
+            /* Cache Refresh button */
             Button b=(Button)findViewById(R.id.button1);
             b.setOnClickListener(listener);
-            //Start Task
+
+            //Start Asynch Task to fetch data from server
             new JSONParse().execute();
-        }  else  {
+        }  else  { /* Network unavailable : Show error dialog */
             try {
+            	/* Create Dialog */
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setMessage("Connect to wifi or quit")
+                builder.setMessage(Utils.NO_NETWORK_MSG1)
                 .setCancelable(false)
-                .setPositiveButton("Connect to WIFI", new DialogInterface.OnClickListener() {
+                .setPositiveButton(Utils.CONNECT_NETWORK, new DialogInterface.OnClickListener() {
                    public void onClick(DialogInterface dialog, int id) {
                 	   startActivity(new Intent(android.provider.Settings.ACTION_WIRELESS_SETTINGS));
                    }
                  })
-                .setNegativeButton("Quit", new DialogInterface.OnClickListener() {
+                .setNegativeButton(Utils.QUIT, new DialogInterface.OnClickListener() {
                    public void onClick(DialogInterface dialog, int id) {
                         finish();
                    }
@@ -98,6 +101,7 @@ public class MainActivity extends Activity {
         //TODO later
     }
 
+    /* Asych Task download JSON from server and sets the UI */
     private class JSONParse extends AsyncTask<String, String, JSONObject> {
         private ProgressDialog pDialog;
 
@@ -116,7 +120,7 @@ public class MainActivity extends Activity {
            JSONParser jParser = new JSONParser();
 
            // Getting JSON from URL
-           JSONObject json = jParser.getJSONFromUrl(url);
+           JSONObject json = jParser.getJSONFromUrl(Utils.URL);
            return json;
        }
         @Override
@@ -132,16 +136,19 @@ public class MainActivity extends Activity {
                       JsonItem dataItem = new JsonItem(row.getString("title"), row.getString("description"),row.getString("imageHref")); 
                       listData.add(dataItem);
                    }
+                   /* Notify updating UI */
                    adapter.notifyDataSetChanged();
+
+                   /* Set title of action bar */
                    ActionBar actionBar = getActionBar();
                    actionBar.setTitle(title);
-
            } catch (JSONException e) {
                e.printStackTrace();
            }
         }
    }
 
+    /* Check network availability */
     private boolean isOnline() {
         boolean haveConnectedWifi = false;
         boolean haveConnectedMobile = false;
@@ -149,10 +156,10 @@ public class MainActivity extends Activity {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo[] netInfo = cm.getAllNetworkInfo();
         for (NetworkInfo ni : netInfo) {
-            if (ni.getTypeName().equalsIgnoreCase("WIFI"))
+            if (ni.getTypeName().equalsIgnoreCase(Utils.WIFI))
                 if (ni.isConnected())
                     haveConnectedWifi = true;
-            if (ni.getTypeName().equalsIgnoreCase("MOBILE"))
+            if (ni.getTypeName().equalsIgnoreCase(Utils.MOBILE))
                 if (ni.isConnected())
                     haveConnectedMobile = true;
         }
