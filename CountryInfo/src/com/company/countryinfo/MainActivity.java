@@ -8,9 +8,16 @@ import org.json.JSONObject;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -18,6 +25,7 @@ import android.widget.ListView;
 
 public class MainActivity extends Activity {
 
+    private static final String TAG = "MainActivity";
     private ArrayList<JsonItem>  listData = new ArrayList<JsonItem>();
     //URL to get JSON Array
     private static String url = "https://dl.dropboxusercontent.com/u/746330/facts.json";
@@ -30,30 +38,49 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        list=(ListView)findViewById(R.id.list);
-        // Create custom adapter for listview
-        adapter=new LazyImageLoadAdapter(this, listData);
+        if (isOnline()) {
 
-        //Set adapter to listview
-        list.setAdapter(adapter);
+            list=(ListView)findViewById(R.id.list);
+            // Create custom adapter for listview
+            adapter=new LazyImageLoadAdapter(this, listData);
 
-        Button b=(Button)findViewById(R.id.button1);
-        b.setOnClickListener(listener);
+            //Set adapter to listview
+            list.setAdapter(adapter);
+
+            Button b=(Button)findViewById(R.id.button1);
+            b.setOnClickListener(listener);
+            //Start Task
+            new JSONParse().execute();
+        }  else  {
+            try {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setMessage("Connect to wifi or quit")
+                .setCancelable(false)
+                .setPositiveButton("Connect to WIFI", new DialogInterface.OnClickListener() {
+                   public void onClick(DialogInterface dialog, int id) {
+                	   startActivity(new Intent(android.provider.Settings.ACTION_WIRELESS_SETTINGS));
+                   }
+                 })
+                .setNegativeButton("Quit", new DialogInterface.OnClickListener() {
+                   public void onClick(DialogInterface dialog, int id) {
+                        finish();
+                   }
+                });
+                 AlertDialog alert = builder.create();
+                 alert.show();
+                }
+                catch(Exception e) {
+                    Log.d(TAG, "Show Dialog: "+e.getMessage());
+                }
+            }
     }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        //Start Task
-        new JSONParse().execute();
-    }
-
-
 
     @Override
     public void onDestroy() {
         // Remove adapter refference from list
-        list.setAdapter(null);
+    	if (list != null) {
+            list.setAdapter(null);
+        }
         super.onDestroy();
     }
 
@@ -114,4 +141,21 @@ public class MainActivity extends Activity {
            }
         }
    }
+
+    private boolean isOnline() {
+        boolean haveConnectedWifi = false;
+        boolean haveConnectedMobile = false;
+
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo[] netInfo = cm.getAllNetworkInfo();
+        for (NetworkInfo ni : netInfo) {
+            if (ni.getTypeName().equalsIgnoreCase("WIFI"))
+                if (ni.isConnected())
+                    haveConnectedWifi = true;
+            if (ni.getTypeName().equalsIgnoreCase("MOBILE"))
+                if (ni.isConnected())
+                    haveConnectedMobile = true;
+        }
+        return haveConnectedWifi || haveConnectedMobile;
+    }
 }
