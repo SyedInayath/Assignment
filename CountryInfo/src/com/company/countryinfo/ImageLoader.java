@@ -23,109 +23,109 @@ import android.graphics.BitmapFactory;
 import android.widget.ImageView;
 
 public class ImageLoader {
-    
-	// Initialize MemoryCache
+
+    // Initialize MemoryCache
     MemoryCache memoryCache = new MemoryCache();
-    
+
     FileCache fileCache;
-    
+
     //Create Map (collection) to store image and image url in key value pair
     private Map<ImageView, String> imageViews = Collections.synchronizedMap(new WeakHashMap<ImageView, String>());
     ExecutorService executorService;
-    
+
     //handler to display images in UI thread
     Handler handler = new Handler();
-    
-    public ImageLoader(Context context){
-    	
+
+    public ImageLoader(Context context) {
+
         fileCache = new FileCache(context);
-        
+
         // Creates a thread pool that reuses a fixed number of 
         // threads operating off a shared unbounded queue.
         executorService=Executors.newFixedThreadPool(5);
-        
+
     }
-    
+
     // default image show in list (Before online image download)
     final int stub_id=R.drawable.stub;
-    
+
     public void DisplayImage(String url, ImageView imageView)
     {
-    	//Store image and url in Map
+        //Store image and url in Map
         imageViews.put(imageView, url);
-        
+
         //Check image is stored in MemoryCache Map or not (see MemoryCache.java)
         Bitmap bitmap = memoryCache.get(url);
-        
-        if(bitmap!=null){
-        	// if image is stored in MemoryCache Map then
-        	// Show image in listview row
+
+        if(bitmap!=null) {
+            // if image is stored in MemoryCache Map then
+            // Show image in listview row
             imageView.setImageBitmap(bitmap);
         }
         else
         {
-        	//queue Photo to download from url
+            //queue Photo to download from url
             queuePhoto(url, imageView);
-            
+
             //Before downloading image show default image 
             imageView.setImageResource(stub_id);
         }
     }
-        
+
     private void queuePhoto(String url, ImageView imageView)
     {
-    	// Store image and url in PhotoToLoad object
+        // Store image and url in PhotoToLoad object
         PhotoToLoad p = new PhotoToLoad(url, imageView);
-        
+
         // pass PhotoToLoad object to PhotosLoader runnable class
         // and submit PhotosLoader runnable to executers to run runnable
         // Submits a PhotosLoader runnable task for execution  
         
         executorService.submit(new PhotosLoader(p));
     }
-    
+
     //Task for the queue
     private class PhotoToLoad
     {
         public String url;
         public ImageView imageView;
-        public PhotoToLoad(String u, ImageView i){
+        public PhotoToLoad(String u, ImageView i) {
             url=u; 
             imageView=i;
         }
     }
-    
+
     class PhotosLoader implements Runnable {
         PhotoToLoad photoToLoad;
-        
-        PhotosLoader(PhotoToLoad photoToLoad){
+
+        PhotosLoader(PhotoToLoad photoToLoad) {
             this.photoToLoad=photoToLoad;
         }
-        
+
         @Override
         public void run() {
             try{
-            	//Check if image already downloaded
+                //Check if image already downloaded
                 if(imageViewReused(photoToLoad))
                     return;
                 // download image from web url
                 Bitmap bmp = getBitmap(photoToLoad.url);
-                
+
                 // set image data in Memory Cache
                 memoryCache.put(photoToLoad.url, bmp);
-                
+
                 if(imageViewReused(photoToLoad))
                     return;
-                
+
                 // Get bitmap to display
                 BitmapDisplayer bd=new BitmapDisplayer(bmp, photoToLoad);
-                
+
                 // Causes the Runnable bd (BitmapDisplayer) to be added to the message queue. 
                 // The runnable will be run on the thread to which this handler is attached.
                 // BitmapDisplayer run method will call
                 handler.post(bd);
-                
-            }catch(Throwable th){
+
+            }catch(Throwable th) {
                 th.printStackTrace();
             }
         }
@@ -143,7 +143,7 @@ public class ImageLoader {
         
         // Download image file from web
         try {
-        	
+            
             Bitmap bitmap=null;
             URL imageUrl = new URL(url);
             HttpURLConnection conn = (HttpURLConnection)imageUrl.openConnection();
@@ -170,7 +170,7 @@ public class ImageLoader {
             
             return bitmap;
             
-        } catch (Throwable ex){
+        } catch (Throwable ex) {
            ex.printStackTrace();
            if(ex instanceof OutOfMemoryError)
                memoryCache.clear();
@@ -179,10 +179,10 @@ public class ImageLoader {
     }
 
     //Decodes image and scales it to reduce memory consumption
-    private Bitmap decodeFile(File f){
-    	
+    private Bitmap decodeFile(File f) {
+        
         try {
-        	
+            
             //Decode image size
             BitmapFactory.Options o = new BitmapFactory.Options();
             o.inJustDecodeBounds = true;
@@ -197,7 +197,7 @@ public class ImageLoader {
             
             int width_tmp=o.outWidth, height_tmp=o.outHeight;
             int scale=1;
-            while(true){
+            while(true) {
                 if(width_tmp/2<REQUIRED_SIZE || height_tmp/2<REQUIRED_SIZE)
                     break;
                 width_tmp/=2;
@@ -221,8 +221,8 @@ public class ImageLoader {
         return null;
     }
     
-    boolean imageViewReused(PhotoToLoad photoToLoad){
-    	
+    boolean imageViewReused(PhotoToLoad photoToLoad) {
+        
         String tag=imageViews.get(photoToLoad.imageView);
         //Check url is already exist in imageViews MAP
         if(tag==null || !tag.equals(photoToLoad.url))
@@ -235,7 +235,7 @@ public class ImageLoader {
     {
         Bitmap bitmap;
         PhotoToLoad photoToLoad;
-        public BitmapDisplayer(Bitmap b, PhotoToLoad p){bitmap=b;photoToLoad=p;}
+        public BitmapDisplayer(Bitmap b, PhotoToLoad p) {bitmap=b;photoToLoad=p;}
         public void run()
         {
             if(imageViewReused(photoToLoad))
@@ -250,7 +250,7 @@ public class ImageLoader {
     }
 
     public void clearCache() {
-    	//Clear cache directory downloaded images and stored data in maps
+        //Clear cache directory downloaded images and stored data in maps
         memoryCache.clear();
         fileCache.clear();
     }

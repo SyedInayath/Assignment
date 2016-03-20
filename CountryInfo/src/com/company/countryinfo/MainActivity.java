@@ -15,15 +15,13 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.Toast;
 
 public class MainActivity extends Activity {
 
-	private ArrayList<JsonItem>  listData = new ArrayList<JsonItem>();
+    private ArrayList<JsonItem>  listData = new ArrayList<JsonItem>();
     //URL to get JSON Array
     private static String url = "https://dl.dropboxusercontent.com/u/746330/facts.json";
-  
-    
+
     ListView list;
     LazyImageLoadAdapter adapter;
 
@@ -31,55 +29,51 @@ public class MainActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        
+
         list=(ListView)findViewById(R.id.list);
         // Create custom adapter for listview
         adapter=new LazyImageLoadAdapter(this, listData);
-        
+
         //Set adapter to listview
         list.setAdapter(adapter);
-        
+
         Button b=(Button)findViewById(R.id.button1);
         b.setOnClickListener(listener);
     }
-    
-    
-    
+
     @Override
-	protected void onStart() {
-		super.onStart();
-		//Start Task
-		new JSONParse().execute();
-	}
+    protected void onStart() {
+        super.onStart();
+        //Start Task
+        new JSONParse().execute();
+    }
 
 
 
-	@Override
-    public void onDestroy()
-    {
-    	// Remove adapter refference from list
+    @Override
+    public void onDestroy() {
+        // Remove adapter refference from list
         list.setAdapter(null);
         super.onDestroy();
     }
-    
+
     public OnClickListener listener=new OnClickListener(){
         @Override
         public void onClick(View arg0) {
-        	
-        	//Refresh cache directory downloaded images
+
+            //Refresh cache directory downloaded images
             adapter.imageLoader.clearCache();
             adapter.notifyDataSetChanged();
         }
     };
-    
-    
+
     public void onItemClick(int position) {
-    	//TODO later
+        //TODO later
     }
 
     private class JSONParse extends AsyncTask<String, String, JSONObject> {
         private ProgressDialog pDialog;
-        
+
        @Override
        protected void onPreExecute() {
            super.onPreExecute();
@@ -103,14 +97,14 @@ public class MainActivity extends Activity {
             pDialog.dismiss();
             try {
                    // Getting JSON Array
-            	   String title = json.getString("title");
-            	   JSONArray rows = json.getJSONArray("rows");
-            	   
-            	   for (int index = 0; index < rows.length(); index ++) {
-            		  JSONObject row = rows.getJSONObject(index);
-            		  JsonItem dataItem = new JsonItem(row.getString("title"), row.getString("description"),row.getString("imageHref")); 
-            		  listData.add(dataItem);
-            	   }                   
+                   String title = json.getString("title");
+                   JSONArray rows = json.getJSONArray("rows");
+
+                   for (int index = 0; index < rows.length(); index ++) {
+                      JSONObject row = rows.getJSONObject(index);
+                      JsonItem dataItem = new JsonItem(row.getString("title"), row.getString("description"),row.getString("imageHref")); 
+                      listData.add(dataItem);
+                   }
                    adapter.notifyDataSetChanged();
                    ActionBar actionBar = getActionBar();
                    actionBar.setTitle(title);

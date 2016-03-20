@@ -19,13 +19,13 @@ import android.util.Log;
 public class JSONParser {
  
     private static final String TAG = "JSONParser";
-	static InputStream is = null;
+    static InputStream is = null;
     static JSONObject jObj = null;
     static String json = "";
-  
+
     public JSONObject getJSONFromUrl(String strUrl) {
  
-    	try {
+        try {
             // defaultHttpClient
             DefaultHttpClient httpClient = new DefaultHttpClient();
             HttpGet httpGet = new HttpGet(strUrl);
@@ -43,15 +43,13 @@ public class JSONParser {
         }
  
         try {
-        	
-        	BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(is));
+            BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(is));
             String line = "";
             String result = "";
             while((line = bufferedReader.readLine()) != null)
                 result += line;
-            
+
             is.close();
-            
             json = result;
         } catch (Exception e) {
             Log.e("Buffer Error", "Error converting result " + e.toString());
