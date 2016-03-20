@@ -1,0 +1,14 @@
+=========================================================================================
+[Release Notes] Dated: 21 March 2016
+=========================================================================================
+Softwar version	: V1.0
+Source path		: https://github.com/SyedInayath/Assignment/tree/master/CountryInfo
+Description		:
+				  Release as per requirement given.
+Libary/Examples	: https://github.com/thest1/LazyList
+				  Lazy list source is used for cache.
+=========================================================================================
+Limitation:
+Referesh is done for image data refresh only.
+
+=========================================================================================
